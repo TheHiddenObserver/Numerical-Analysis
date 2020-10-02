@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Sep 24 17:39:32 2020
+
+@author: linziqian
 """
 
 import numpy as np
 
 class Interpolate:
-    def __init__(self,x,y):
+    def __init__(self,x = None,y = None):
         '''
         x: 被插节点
         y: 插值条件
         '''
-        self.x = np.array(x)
-        self.y = np.array(y)
+        self.__x = np.array(x)
+        self.__y = np.array(y)
+        self.diff = [[] for _ in range(len(x))] if x is not None else []
+        
+    def update_points(self, x, y):
+        self.__x = np.array(x)
+        self.__y = np.array(y)
         self.diff = [[] for _ in range(len(x))]
+        self.calculate_diff()
     
     def Lagrange(self, r):
         '''
@@ -21,9 +29,9 @@ class Interpolate:
         Return an array of interpolation result.
         r: the new points
         '''
-        if len(self.x) != len(self.y):
+        x, y = self.__x, self.__y
+        if len(x) != len(y):
             raise ValueError("Length Error")
-        x, y = self.x, self.y
         res = []
         for point in r:
             tmp = []
@@ -40,7 +48,7 @@ class Interpolate:
         '''
         Successive linear interpolation method.
         '''
-        x, y = self.x, self.y
+        x, y = self.__x, self.__y
         if len(x) != len(y):
             raise ValueError("Lengths are not equal")
         n = len(x)
@@ -59,7 +67,7 @@ class Interpolate:
         '''
         Calculate the difference quotient for the interpolators.
         '''
-        x, y = self.x, self.y
+        x, y = self.__x, self.__y
         n = len(x)
         self.diff[0] = list(y)
         for k in range(1,n):
@@ -70,7 +78,7 @@ class Interpolate:
         '''
         Newton method.
         '''
-        x, y = self.x, self.y
+        x, y = self.__x, self.__y
         if len(x) != len(y):
             raise ValueError("Lengths are not equal")
         n = len(x)
@@ -110,3 +118,9 @@ if __name__ == '__main__':
     print(inter_new.calculate_error(r,inter_new.Lagrange(r), fun),
           inter_new.calculate_error(r,inter_new.Linear(r), fun),
           inter_new.calculate_error(r,inter_new.Newton(r), fun),sep = '\n')
+    
+    inter2 = Interpolate()
+    inter2.update_points(x, y)
+    print(inter2.calculate_error(r,inter.Lagrange(r), fun),
+          inter2.calculate_error(r,inter.Linear(r), fun),
+          inter2.calculate_error(r,inter.Newton(r), fun),sep = '\n')
